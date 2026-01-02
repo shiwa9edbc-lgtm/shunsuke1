@@ -13,6 +13,14 @@ import time
 # 環境変数を読み込み
 load_dotenv()
 
+# YouTube API Key取得（Streamlit Cloud対応）
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
+
+# API Key未設定時のエラーチェック
+if not YOUTUBE_API_KEY:
+    st.error("⚠️ YouTube API Keyが設定されていません。管理者に連絡してください。")
+    st.stop()
+
 # クォータ使用量の永続化ファイルパス
 QUOTA_FILE = "quota_usage.json"
 
@@ -373,14 +381,13 @@ st.markdown("""
 # YouTube API v3クライアントを初期化
 @st.cache_resource
 def get_youtube_client():
-    api_key = os.getenv('YOUTUBE_API_KEY')
-    if not api_key:
+    if not YOUTUBE_API_KEY:
         st.error("環境変数 'YOUTUBE_API_KEY' が設定されていません。")
-        st.info("プロジェクトルートに .env ファイルを作成し、YOUTUBE_API_KEY=your_api_key を設定してください。")
+        st.info("Streamlit CloudのSecretsでYOUTUBE_API_KEYを設定してください。")
         return None
     
     try:
-        youtube = build('youtube', 'v3', developerKey=api_key)
+        youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
         return youtube
     except Exception as e:
         st.error(f"YouTube API クライアントの初期化に失敗しました: {e}")
